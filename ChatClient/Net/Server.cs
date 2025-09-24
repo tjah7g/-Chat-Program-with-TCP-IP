@@ -25,46 +25,59 @@ namespace ChatClient.Net
 
         public void ConnectToServer(string username)
         {
-            if(!_client.Connected)
+            if (_client == null || !_client.Connected)
             {
+                _client = new TcpClient(); 
                 _client.Connect("127.0.0.1", 7891);
+
                 PacketReader = new PacketReader(_client.GetStream());
-                if(!string.IsNullOrEmpty(username))
+
+                if (!string.IsNullOrEmpty(username))
                 {
                     var connectPacket = new PacketBuilder();
                     connectPacket.WriteOpCode(0);
                     connectPacket.WriteMessage(username);
                     _client.Client.Send(connectPacket.GetPacketBytes());
                 }
+
                 ReadPackets();
             }
         }
+
 
         private void ReadPackets()
         {
             Task.Run(() =>
             {
-                while(true)
+                try
                 {
-                    var opcode = PacketReader.ReadByte();
-                    switch(opcode)
+                    while (IsConnected)
                     {
-                        case 1:
-                            connectedEvent?.Invoke();
-                            break;
-                        case 5:
-                            msgReceivedEvent?.Invoke();
-                            break;
-                        case 10:
-                            userDisconnectEvent?.Invoke();
-                            break;
-                        default:
-                            Console.WriteLine("Tes");
-                            break;
+                        var opcode = PacketReader.ReadByte();
+                        switch (opcode)
+                        {
+                            case 1:
+                                connectedEvent?.Invoke();
+                                break;
+                            case 5:
+                                msgReceivedEvent?.Invoke();
+                                break;
+                            case 10:
+                                userDisconnectEvent?.Invoke();
+                                break;
+                            default:
+                                Console.WriteLine("Unknown opcode");
+                                break;
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Connection closed: " + ex.Message);
                 }
             });
         }
+
 
         public void SendMessageToServer(string message)
         {
