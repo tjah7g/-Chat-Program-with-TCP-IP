@@ -96,10 +96,14 @@ namespace ChatClient.MVVM.ViewModel
                 UID = _server.PacketReader.ReadMessage()
             };
 
-            if(!Users.Any(x => x.UID == user.UID))
+            if (user.UserName == Username)
+                _server.UID = user.UID;
+
+            if (!Users.Any(x => x.UID == user.UID))
             {
                 Application.Current.Dispatcher.Invoke(() => Users.Add(user));
             }
         }
+
     }
 }

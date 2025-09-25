@@ -63,5 +63,26 @@ namespace ChatServer
             }
             BroadcastMessage($"[{disconnectedUser.Username}] Disconnected");
         }
+
+        public static void HandleDisconnect(string uid)
+        {
+            var disconnectedUser = _users.Where(x => x.UID.ToString() == uid).FirstOrDefault();
+            if (disconnectedUser != null)
+            {
+                _users.Remove(disconnectedUser);
+
+                foreach (var user in _users)
+                {
+                    var packet = new PacketBuilder();
+                    packet.WriteOpCode(10);
+                    packet.WriteMessage(uid);
+                    user.ClientSocket.Client.Send(packet.GetPacketBytes());
+                }
+
+                BroadcastMessage($"[{disconnectedUser.Username}] Disconnected");
+                Console.WriteLine($"[{disconnectedUser.Username}] Disconnected manually");
+            }
+        }
+
     }
 }

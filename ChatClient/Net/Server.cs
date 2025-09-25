@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using ChatClient.Net.IO;
+using System.Security.Cryptography;
 
 namespace ChatClient.Net
 {
@@ -16,6 +17,7 @@ namespace ChatClient.Net
         public event Action msgReceivedEvent;
         public event Action userDisconnectEvent;
         public bool IsConnected => _client?.Connected ?? false;
+        public string UID { get; set; }
 
 
         public Server()
@@ -91,6 +93,11 @@ namespace ChatClient.Net
         {
             if (_client != null && _client.Connected)
             {
+                var disconnectPacket = new PacketBuilder();
+                disconnectPacket.WriteOpCode(10); 
+                disconnectPacket.WriteMessage(UID); 
+                _client.Client.Send(disconnectPacket.GetPacketBytes());
+
                 _client.Close();
                 Console.WriteLine("Disconnected from server.");
             }

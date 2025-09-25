@@ -42,6 +42,12 @@ namespace ChatServer
                             Program.BroadcastMessage($"[{DateTime.Now}]: [{Username}]: {msg}");
                             break;
 
+                        case 10:
+                            var uid = _packetReadeer.ReadMessage();
+                            Program.HandleDisconnect(uid);
+                            ClientSocket.Close();
+                            return;
+
                         default:
                             break;
                     }
