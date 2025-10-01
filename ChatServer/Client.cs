@@ -33,7 +33,15 @@ namespace ChatServer
                 if (joinProtocol != null && joinProtocol.Type == "join")
                 {
                     Username = joinProtocol.From;
+
+                    // Send back join confirmation with assigned UID
+                    var confirmProtocol = Protocol.CreateJoin(Username, UID.ToString());
+                    SendProtocol(confirmProtocol);
+
                     Program.Log($"Client connected: {Username} [{UID}]");
+
+                    // Notify about successful join
+                    Program.BroadcastConnection();
                 }
 
                 while (_isRunning && ClientSocket.Connected)

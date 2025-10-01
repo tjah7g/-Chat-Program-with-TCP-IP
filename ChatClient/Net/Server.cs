@@ -38,12 +38,12 @@ namespace ChatClient.Net
                     Username = username;
                     _cancellationTokenSource = new CancellationTokenSource();
 
-                    // Send join protocol
+                    // Start reading packets FIRST
+                    _ = Task.Run(() => ReadPacketsAsync(_cancellationTokenSource.Token));
+
+                    // Then send join protocol
                     var joinProtocol = Protocol.CreateJoin(username, "");
                     await SendProtocolAsync(joinProtocol);
-
-                    // Start reading packets
-                    _ = Task.Run(() => ReadPacketsAsync(_cancellationTokenSource.Token));
 
                     ConnectionStatusChanged?.Invoke("Connected");
                     return true;

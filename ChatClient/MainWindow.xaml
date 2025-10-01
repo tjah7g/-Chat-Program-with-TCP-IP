@@ -9,13 +9,15 @@
         Title="Chat Client" Height="550" Width="900"
         Background="{DynamicResource WindowBackground}">
     <Window.Resources>
-        <!-- Light Theme -->
-        <SolidColorBrush x:Key="WindowBackground" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="PanelBackground" Color="#F5F5F5"/>
-        <SolidColorBrush x:Key="TextColor" Color="#000000"/>
-        <SolidColorBrush x:Key="BorderColor" Color="#CCCCCC"/>
-        <SolidColorBrush x:Key="ButtonBackground" Color="#007ACC"/>
-        <SolidColorBrush x:Key="ButtonHover" Color="#005A9E"/>
+        <!-- Theme Resources - Will be updated dynamically -->
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="WindowBackground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="PanelBackground" Color="#F5F5F5"/>
+            <SolidColorBrush x:Key="TextColor" Color="#000000"/>
+            <SolidColorBrush x:Key="BorderColor" Color="#CCCCCC"/>
+            <SolidColorBrush x:Key="ButtonBackground" Color="#007ACC"/>
+            <SolidColorBrush x:Key="ButtonHover" Color="#005A9E"/>
+        </ResourceDictionary>
     </Window.Resources>
     <Window.DataContext>
         <viewmodel:MainViewModel/>
@@ -84,22 +86,27 @@
                              Background="{DynamicResource WindowBackground}"
                              Foreground="{DynamicResource TextColor}"
                              Height="200"
-                             SelectedItem="{Binding SelectedUser}">
+                             SelectedItem="{Binding SelectedUser}"
+                             BorderThickness="0">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="10" Height="10" Fill="Green" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding UserName}"/>
+                                    <Ellipse Width="10" Height="10" Fill="LimeGreen" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding UserName}" 
+                                              Foreground="{DynamicResource TextColor}"/>
                                     <TextBlock Text=" (typing...)" 
                                               Visibility="{Binding IsTyping, Converter={StaticResource BoolToVisibilityConverter}}"
-                                              FontStyle="Italic" Foreground="Gray" Margin="5,0,0,0"/>
+                                              FontStyle="Italic" 
+                                              Foreground="Gray" 
+                                              Margin="5,0,0,0"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Private Chat" 
-                                         Command="{Binding OpenPrivateChatCommand}"/>
+                                         Command="{Binding PlacementTarget.DataContext.OpenPrivateChatCommand, 
+                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                             </ContextMenu>
                         </ListView.ContextMenu>
                     </ListView>
@@ -133,7 +140,7 @@
                           Height="20" Margin="5,0"/>
 
                 <StackPanel Orientation="Horizontal">
-                    <TextBox Height="60" Width="572"
+                    <TextBox Height="60" Width="553"
                             VerticalContentAlignment="Top"
                             TextWrapping="Wrap"
                             AcceptsReturn="True"
@@ -143,7 +150,7 @@
                             <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
                         </TextBox.InputBindings>
                     </TextBox>
-                    <Button Width="68" Height="60"
+                    <Button Width="87" Height="60"
                            Content="Send"
                            Background="{DynamicResource ButtonBackground}"
                            Foreground="White"

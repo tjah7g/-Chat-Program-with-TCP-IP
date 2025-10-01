@@ -264,6 +264,12 @@ namespace ChatClient.MVVM.ViewModel
 
         private void HandleUserJoin(Protocol protocol)
         {
+            if (string.IsNullOrEmpty(protocol.From) || string.IsNullOrEmpty(protocol.UID))
+            {
+                // Invalid protocol, skip
+                return;
+            }
+
             var existingUser = Users.FirstOrDefault(u => u.UID == protocol.UID);
             if (existingUser == null)
             {
@@ -274,6 +280,7 @@ namespace ChatClient.MVVM.ViewModel
                     IsTyping = false
                 });
 
+                // Don't show notification for ourselves
                 if (protocol.From != Username)
                 {
                     Messages.Add($"[SYSTEM] {protocol.From} joined the chat");
@@ -385,25 +392,42 @@ namespace ChatClient.MVVM.ViewModel
 
         private void ApplyTheme(bool isDark)
         {
-            var resources = Application.Current.Resources;
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow == null) return;
+
+            var resources = mainWindow.Resources;
 
             if (isDark)
             {
-                resources["WindowBackground"] = new SolidColorBrush(Color.FromRgb(30, 30, 30));
-                resources["PanelBackground"] = new SolidColorBrush(Color.FromRgb(45, 45, 45));
-                resources["TextColor"] = new SolidColorBrush(Colors.White);
-                resources["BorderColor"] = new SolidColorBrush(Color.FromRgb(60, 60, 60));
-                resources["ButtonBackground"] = new SolidColorBrush(Color.FromRgb(0, 122, 204));
-                resources["ButtonHover"] = new SolidColorBrush(Color.FromRgb(0, 90, 158));
+                // Dark Theme
+                UpdateResource(resources, "WindowBackground", Color.FromRgb(30, 30, 30));
+                UpdateResource(resources, "PanelBackground", Color.FromRgb(45, 45, 45));
+                UpdateResource(resources, "TextColor", Colors.White);
+                UpdateResource(resources, "BorderColor", Color.FromRgb(60, 60, 60));
+                UpdateResource(resources, "ButtonBackground", Color.FromRgb(0, 122, 204));
+                UpdateResource(resources, "ButtonHover", Color.FromRgb(0, 90, 158));
             }
             else
             {
-                resources["WindowBackground"] = new SolidColorBrush(Colors.White);
-                resources["PanelBackground"] = new SolidColorBrush(Color.FromRgb(245, 245, 245));
-                resources["TextColor"] = new SolidColorBrush(Colors.Black);
-                resources["BorderColor"] = new SolidColorBrush(Color.FromRgb(204, 204, 204));
-                resources["ButtonBackground"] = new SolidColorBrush(Color.FromRgb(0, 122, 204));
-                resources["ButtonHover"] = new SolidColorBrush(Color.FromRgb(0, 90, 158));
+                // Light Theme
+                UpdateResource(resources, "WindowBackground", Colors.White);
+                UpdateResource(resources, "PanelBackground", Color.FromRgb(245, 245, 245));
+                UpdateResource(resources, "TextColor", Colors.Black);
+                UpdateResource(resources, "BorderColor", Color.FromRgb(204, 204, 204));
+                UpdateResource(resources, "ButtonBackground", Color.FromRgb(0, 122, 204));
+                UpdateResource(resources, "ButtonHover", Color.FromRgb(0, 90, 158));
+            }
+        }
+
+        private void UpdateResource(ResourceDictionary resources, string key, Color color)
+        {
+            if (resources.Contains(key))
+            {
+                resources[key] = new SolidColorBrush(color);
+            }
+            else
+            {
+                resources.Add(key, new SolidColorBrush(color));
             }
         }
     }

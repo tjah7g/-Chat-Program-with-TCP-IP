@@ -67,18 +67,22 @@ namespace ChatServer
             }
         }
 
-        static void BroadcastConnection()
+        public static void BroadcastConnection()
         {
             try
             {
+                // Send all existing users to all clients (including the new one)
                 foreach (var user in _users.ToList())
                 {
                     foreach (var usr in _users.ToList())
                     {
                         try
                         {
-                            var protocol = Protocol.CreateJoin(usr.Username, usr.UID.ToString());
-                            user.SendProtocol(protocol);
+                            if (user.ClientSocket?.Connected == true)
+                            {
+                                var protocol = Protocol.CreateJoin(usr.Username, usr.UID.ToString());
+                                user.SendProtocol(protocol);
+                            }
                         }
                         catch (Exception ex)
                         {
