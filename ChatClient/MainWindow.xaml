@@ -1,0 +1,156 @@
+﻿<Window x:Class="ChatClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ChatClient" 
+        xmlns:viewmodel="clr-namespace:ChatClient.MVVM.ViewModel"
+        mc:Ignorable="d"
+        Title="Chat Client" Height="550" Width="900"
+        Background="{DynamicResource WindowBackground}">
+    <Window.Resources>
+        <!-- Light Theme -->
+        <SolidColorBrush x:Key="WindowBackground" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="PanelBackground" Color="#F5F5F5"/>
+        <SolidColorBrush x:Key="TextColor" Color="#000000"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#CCCCCC"/>
+        <SolidColorBrush x:Key="ButtonBackground" Color="#007ACC"/>
+        <SolidColorBrush x:Key="ButtonHover" Color="#005A9E"/>
+    </Window.Resources>
+    <Window.DataContext>
+        <viewmodel:MainViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel - Connection & Users -->
+        <DockPanel Background="{DynamicResource PanelBackground}">
+            <!-- Connection Settings -->
+            <StackPanel DockPanel.Dock="Top" Margin="10">
+                <TextBlock Text="Connection Settings" FontWeight="Bold" 
+                          Foreground="{DynamicResource TextColor}" Margin="0,0,0,10"/>
+
+                <TextBlock Text="Username:" Foreground="{DynamicResource TextColor}"/>
+                <TextBox Height="25" Margin="0,2,0,5"
+                         Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsNotConnected}"/>
+
+                <TextBlock Text="IP Address:" Foreground="{DynamicResource TextColor}"/>
+                <TextBox Height="25" Margin="0,2,0,5"
+                         Text="{Binding IpAddress, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsNotConnected}"/>
+
+                <TextBlock Text="Port:" Foreground="{DynamicResource TextColor}"/>
+                <TextBox Height="25" Margin="0,2,0,5"
+                         Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsNotConnected}"/>
+
+                <Button Height="30" Margin="0,5,0,2"
+                        Content="Connect"
+                        Background="{DynamicResource ButtonBackground}"
+                        Foreground="White"
+                        Command="{Binding ConnectToServerCommand}"
+                        IsEnabled="{Binding CanConnect}"/>
+
+                <Button Height="30" Margin="0,2,0,5"
+                        Content="Disconnect"
+                        Background="#DC3545"
+                        Foreground="White"
+                        Command="{Binding DisconnectFromServerCommand}"
+                        IsEnabled="{Binding IsConnected}"/>
+
+                <TextBlock Text="{Binding ConnectionStatus}" 
+                          Foreground="{DynamicResource TextColor}"
+                          FontWeight="Bold" HorizontalAlignment="Center" Margin="0,5"/>
+
+                <!-- Theme Toggle -->
+                <CheckBox Content="Dark Mode" 
+                         IsChecked="{Binding IsDarkMode}"
+                         Foreground="{DynamicResource TextColor}"
+                         Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <!-- Online Users -->
+            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BorderColor}" 
+                   BorderThickness="1" Margin="10,5">
+                <StackPanel>
+                    <TextBlock Text="Online Users" FontWeight="Bold" 
+                              Foreground="{DynamicResource TextColor}"
+                              Margin="5"/>
+                    <ListView ItemsSource="{Binding Users}" 
+                             Background="{DynamicResource WindowBackground}"
+                             Foreground="{DynamicResource TextColor}"
+                             Height="200"
+                             SelectedItem="{Binding SelectedUser}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="10" Height="10" Fill="Green" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding UserName}"/>
+                                    <TextBlock Text=" (typing...)" 
+                                              Visibility="{Binding IsTyping, Converter={StaticResource BoolToVisibilityConverter}}"
+                                              FontStyle="Italic" Foreground="Gray" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Private Chat" 
+                                         Command="{Binding OpenPrivateChatCommand}"/>
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                    </ListView>
+                </StackPanel>
+            </Border>
+        </DockPanel>
+
+        <!-- Right Panel - Chat -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Messages -->
+            <ListView ItemsSource="{Binding Messages}"
+                     Background="{DynamicResource WindowBackground}"
+                     Foreground="{DynamicResource TextColor}"
+                     Margin="5">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <!-- Input Area -->
+            <StackPanel Grid.Row="1" Margin="5">
+                <TextBlock Text="{Binding TypingIndicator}" 
+                          FontStyle="Italic" Foreground="Gray" 
+                          Height="20" Margin="5,0"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Height="60" Width="572"
+                            VerticalContentAlignment="Top"
+                            TextWrapping="Wrap"
+                            AcceptsReturn="True"
+                            Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"
+                            Grid.Row="1">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <Button Width="68" Height="60"
+                           Content="Send"
+                           Background="{DynamicResource ButtonBackground}"
+                           Foreground="White"
+                           Command="{Binding SendMessageCommand}"
+                           IsEnabled="{Binding CanSendMessage}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
